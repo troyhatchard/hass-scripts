@@ -1,0 +1,78 @@
+alias: Button - Office
+description: ""
+trigger:
+  - device_id: b7888c167c39807f66b9ce4fd10ae446
+    domain: zha
+    platform: device
+    type: remote_button_short_press
+    subtype: turn_off
+    id: office-off
+  - device_id: b7888c167c39807f66b9ce4fd10ae446
+    domain: zha
+    platform: device
+    type: remote_button_short_press
+    subtype: turn_on
+    id: office-on
+  - device_id: b688ff9e5f0bb555cca95912c829ec26
+    domain: zha
+    platform: device
+    type: remote_button_short_press
+    subtype: turn_on
+    id: livingRoom-on
+  - device_id: b688ff9e5f0bb555cca95912c829ec26
+    domain: zha
+    platform: device
+    type: remote_button_short_press
+    subtype: turn_off
+    id: livingRoom-off
+condition: []
+action:
+  - variables:
+      entityIds:
+        b7888c167c39807f66b9ce4fd10ae446: light.office_lamp
+        b688ff9e5f0bb555cca95912c829ec26: light.living_room_2
+  - alias: Set entityID
+    choose:
+      - conditions:
+          - condition: trigger
+            id:
+              - office-off
+              - office-on
+        sequence:
+          - variables:
+            entityId: light.office_lamp
+      - conditions:
+          - condition: trigger
+            id:
+              - livingRoom-on
+              - livingRoom-off
+        sequence:
+          - variables:
+              - entityId: light.living_room_2
+    enabled: false
+  - choose:
+      - conditions:
+          - condition: trigger
+            subtype:
+              - turn_on
+        sequence:
+          - alias: Turn Light On
+            choose:
+              - conditions:
+                  - condition: state
+                    entity_id: "{{ entityId.[trigger]. }}"
+                    state: "on"
+                  - condition: state
+                    entity_id: light.signify_netherlands_b_v_lwb006_light
+                    state: "off"
+                sequence: []
+                alias: Light Already On?
+        alias: "\"On\" button action"
+    enabled: false
+  - service: script.office_button
+    metadata: {}
+    data:
+      which_trigger:
+        "[object Object]": null
+    enabled: false
+mode: single
